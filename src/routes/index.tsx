@@ -1,119 +1,141 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import videoCover from "@/assets/video-cover.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "出片 — 让 AI 替你挑神仙帧" },
+      { title: "出片 CHU PIAN · AI 视频神仙帧捕捉器" },
       {
         name: "description",
-        content: "上传爱豆 / 旅拍短视频，AI 视觉审美扫描，自动甄选神图。",
+        content: "导入 10 秒爱豆或旅拍视频，AI 自动捕捉最具情绪张力的神仙帧。",
       },
     ],
   }),
   component: Index,
 });
 
+const SCAN_HINTS = [
+  "正在进行端侧画质无损切片…",
+  "正在基于神经美学过滤闭眼与模糊帧…",
+  "AI 正在捕捉最具情绪张力的瞬间…",
+];
+
 function Index() {
   const navigate = useNavigate();
   const [scanning, setScanning] = useState(false);
+  const [hintIndex, setHintIndex] = useState(0);
 
   const handleUpload = () => {
     if (scanning) return;
     setScanning(true);
-    setTimeout(() => {
-      navigate({ to: "/result" });
-    }, 3200);
   };
 
+  useEffect(() => {
+    if (!scanning) return;
+    const tick = setInterval(() => {
+      setHintIndex((i) => (i + 1) % SCAN_HINTS.length);
+    }, 1400);
+    const done = setTimeout(() => {
+      navigate({ to: "/result" });
+    }, 4400);
+    return () => {
+      clearInterval(tick);
+      clearTimeout(done);
+    };
+  }, [scanning, navigate]);
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col bg-background px-6 pb-12 pt-10">
-      <header className="flex items-center justify-between fade-up">
-        <div className="font-serif italic text-xl tracking-display">出片</div>
-        <div className="font-sans text-[10px] uppercase tracking-widest-2 text-muted-foreground">
-          Editorial · AI
-        </div>
+    <main className="mx-auto flex min-h-screen max-w-md flex-col bg-background px-6 pb-14 pt-12">
+      {/* 顶部品牌标语 */}
+      <header className="fade-up text-center">
+        <p className="font-sans text-[11px] tracking-widest-2 text-muted-foreground">
+          <span className="font-serif italic text-foreground text-base align-middle">
+            出片
+          </span>
+          <span className="mx-2 align-middle">CHU PIAN</span>
+          <span className="mx-1 align-middle opacity-50">·</span>
+          <span className="align-middle">AI 视频神仙帧捕捉器</span>
+        </p>
+        <div className="mx-auto mt-5 h-px w-10 bg-border" />
       </header>
 
-      <section className="mt-14 fade-up">
-        <p className="font-sans text-[11px] uppercase tracking-widest-2 text-muted-foreground">
-          Issue 001 — June MMXXVI
-        </p>
-        <h1 className="mt-4 font-serif text-[44px] leading-[1.05] tracking-display text-foreground">
-          Let the algorithm
-          <br />
-          <span className="italic">curate</span> your
-          <br />
-          golden frame.
-        </h1>
-        <p className="mt-6 font-sans text-sm leading-relaxed text-muted-foreground">
-          上传你的旅拍 · 爱豆现场 · 街头短片，
-          <br />
-          AI 将逐帧进行视觉审美扫描，
-          <br />
-          为你呈上仅有的几张神仙帧。
-        </p>
-      </section>
+      <div className="flex flex-1 flex-col items-center justify-center py-16">
+        {!scanning ? (
+          /* 中心呼吸卡片 */
+          <button
+            type="button"
+            onClick={handleUpload}
+            className="breathe group relative flex aspect-[3/4] w-full max-w-[300px] flex-col items-center justify-center rounded-md border border-border bg-card text-center transition-all duration-500 hover:border-foreground/60"
+          >
+            <Reticle />
+            <div className="font-sans text-[10px] tracking-widest-2 text-muted-foreground">
+              POINT · 01
+            </div>
+            <div className="mt-6 font-serif text-[26px] italic leading-tight tracking-display text-foreground">
+              导入 10s
+              <br />
+              爱豆或旅拍视频
+            </div>
+            <div className="mt-8 inline-flex items-center gap-2 font-sans text-[11px] tracking-widest-2 text-foreground">
+              <span className="h-px w-6 bg-foreground" />
+              <span>点击此处上传</span>
+              <span className="h-px w-6 bg-foreground" />
+            </div>
+            <div className="mt-3 font-sans text-[10px] tracking-widest-2 text-muted-foreground">
+              支持 MP4 / MOV / 实况
+            </div>
+          </button>
+        ) : (
+          /* 原地展开的扫描视图 */
+          <div className="w-full max-w-[300px] fade-up">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-md border border-border bg-card">
+              <img
+                src={videoCover}
+                alt="待扫描视频封面"
+                className="block h-full w-full object-cover"
+              />
+              <div className="scan-beam" aria-hidden />
+              <Reticle />
+              <div className="absolute left-3 top-3 font-sans text-[10px] tracking-widest-2 text-background mix-blend-difference">
+                正在扫描
+              </div>
+              <div className="absolute bottom-3 right-3 font-serif italic text-xs text-background mix-blend-difference">
+                00:00 — 00:10
+              </div>
+            </div>
 
-      <section className="mt-10 fade-up">
-        <div className="relative overflow-hidden rounded-md border border-border bg-card shadow-sm">
-          <img
-            src={videoCover}
-            alt="待扫描视频封面"
-            className="block h-[280px] w-full object-cover"
-          />
-          {scanning && <div className="scan-beam" aria-hidden />}
-          <Reticle />
-          <div className="absolute left-3 top-3 font-sans text-[10px] uppercase tracking-widest-2 text-background mix-blend-difference">
-            {scanning ? "Scanning…" : "Ready"}
-          </div>
-          <div className="absolute bottom-3 right-3 font-serif italic text-xs text-background mix-blend-difference">
-            00:00 — 00:32
-          </div>
-        </div>
-
-        {scanning ? (
-          <div className="mt-6 space-y-2">
-            <p className="font-serif italic text-foreground">
-              AI 正在逐帧进行视觉审美扫描…
-            </p>
-            <div className="space-y-1 font-sans text-[11px] uppercase tracking-wider-2 text-muted-foreground">
-              <p className="reticle-pulse">› analyzing composition</p>
-              <p className="reticle-pulse" style={{ animationDelay: "0.3s" }}>
-                › evaluating light &amp; tone
+            <div className="mt-8 min-h-[44px] text-center">
+              <p
+                key={hintIndex}
+                className="hint-rotate font-serif italic text-[15px] text-foreground"
+              >
+                {SCAN_HINTS[hintIndex]}
               </p>
-              <p className="reticle-pulse" style={{ animationDelay: "0.6s" }}>
-                › selecting golden frames
-              </p>
+              <div className="mt-3 flex items-center justify-center gap-1.5">
+                {SCAN_HINTS.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-px w-6 transition-all duration-500 ${
+                      i === hintIndex ? "bg-foreground" : "bg-border"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
-        ) : (
-          <p className="mt-6 text-center font-sans text-[11px] uppercase tracking-widest-2 text-muted-foreground">
-            点击下方按钮 · 开始一次视觉策展
-          </p>
         )}
-      </section>
+      </div>
 
-      <div className="flex-1" />
-
-      <button
-        type="button"
-        onClick={handleUpload}
-        disabled={scanning}
-        className="group mt-10 w-full rounded-md border border-foreground bg-background px-6 py-5 font-sans text-[13px] uppercase tracking-widest-2 text-foreground shadow-sm transition-all duration-300 hover:bg-foreground hover:text-background active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {scanning ? "Scanning in progress…" : "导入爱豆 / 旅拍短视频"}
-      </button>
-      <p className="mt-3 text-center font-serif italic text-[11px] text-muted-foreground">
-        — supports .mp4 / .mov / live photo —
+      <p className="text-center font-sans text-[10px] tracking-widest-2 text-muted-foreground">
+        端侧处理 · 不上传云端
       </p>
     </main>
   );
 }
 
 function Reticle() {
-  const base = "absolute h-3 w-3 border-background mix-blend-difference";
+  const base = "pointer-events-none absolute h-3 w-3 border-foreground/40";
   return (
     <>
       <span className={`${base} left-2 top-2 border-l border-t`} />

@@ -221,4 +221,33 @@
   .filter-vogue { filter: contrast(1.15) saturate(0.85) brightness(0.96); }
   .filter-xhs   { filter: contrast(0.92) saturate(0.55) brightness(1.08) sepia(0.08); }
   .filter-live  { filter: contrast(1.05) saturate(1.1) brightness(1.02); }
+
+  /* 中心呼吸卡片 */
+  .breathe {
+    animation: breathe 3.6s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% {
+      box-shadow: 0 0 0 0 oklch(0.18 0.008 60 / 0.06), 0 1px 0 0 oklch(0.18 0.008 60 / 0.04);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 0 14px oklch(0.18 0.008 60 / 0), 0 1px 0 0 oklch(0.18 0.008 60 / 0.04);
+      transform: scale(1.005);
+    }
+  }
+
+  /* 水平横滑卡片流：隐藏滚动条 */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* 提示文字滚动淡入淡出 */
+  .hint-rotate {
+    animation: hint-rotate 1.4s ease-in-out both;
+  }
+  @keyframes hint-rotate {
+    0% { opacity: 0; transform: translateY(6px); }
+    20%, 80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-6px); }
+  }
 }
